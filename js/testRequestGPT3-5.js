@@ -120,18 +120,44 @@ async function getResponseFromGPT(prompt) {
       max_tokens: 100
     })
   };
+
   try {
     const response = await fetch(endpointURL, options);
     const data = await response.json();
     console.log(data);
     const chatGptReponseTxt = data.choices[0].message.content;
-    // On crée un élément p pour la réponse
-    const pElementChat = document.createElement('p');
-    pElementChat.textContent = chatGptReponseTxt;
-    // On ajoute la réponse dans le div output
-    outputElement.append(pElementChat);
 
-    // Ajout dans l'historique sur la gauche
+    // Create a <p> element for the user's question
+    const questionElement = document.createElement('p');
+    questionElement.textContent = prompt;
+    questionElement.classList.add('question');
+    outputElement.appendChild(questionElement);
+
+    // Create a <p> element for the response
+    const responseElement = document.createElement('p');
+    responseElement.textContent = chatGptReponseTxt;
+    responseElement.classList.add('answer');
+    outputElement.appendChild(responseElement);
+
+    // Add the download button
+    const downloadButton = document.createElement('button');
+    downloadButton.innerHTML = '<i class="fa fa-download"></i> Download Answer';
+    downloadButton.classList.add('download-button');
+    downloadButton.addEventListener('click', () => {
+      downloadAnswer(chatGptReponseTxt, 'answer.txt');
+    });
+    outputElement.appendChild(downloadButton);
+
+    // Add the play button
+    const playButton = document.createElement('button');
+    playButton.innerHTML = '<i class="fa fa-play"></i> Play Answer';
+    playButton.classList.add('play-button');
+    playButton.addEventListener('click', () => {
+      playAnswer(chatGptReponseTxt);
+    });
+    outputElement.appendChild(playButton);
+
+    // Add to the history on the left side
     if (data.choices[0].message.content) {
       const pElement = document.createElement('p');
       pElement.textContent = inputElement.value;
@@ -143,4 +169,9 @@ async function getResponseFromGPT(prompt) {
   } catch (error) {
     console.log(error);
   }
+}
+
+function playAnswer(answerText) {
+  const utterance = new SpeechSynthesisUtterance(answerText);
+  speechSynthesis.speak(utterance);
 }

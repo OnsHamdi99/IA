@@ -115,3 +115,14 @@ nav {
     overflow: hidden;
     box-shadow: rgb(38, 57, 77) 0 20px 30px -10px;
 }
+.question {
+    background-color: #707070;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .answer {
+    background-color: #434343;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
