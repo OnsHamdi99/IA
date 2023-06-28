@@ -9,7 +9,7 @@
     <script type="module" src="js/testRequestGPT3-5.js"></script>
     <audio id="audioElement"></audio>
 </head>
-<body>
+<body>+
     <section class="side-bar">
         <button>New chat</button>
         <div class="history"></div>
@@ -21,6 +21,19 @@
         <h1>MiageGPT</h1>
         <div id="output"></div>
         <div class="bottom-section">
+            <select id="style-select" style="float: left; color: black;">
+                <option value=""></option>
+                <option value="3d">3D</option>
+                <option value="realistic">Realistic</option>
+                <option value="davinci">DaVinci Style</option>
+                <option value="drawing">Drawing crayon</option>
+              </select>
+              <select id="weather-select" style="float: left; color: black;">
+                <option value=""></option>
+                <option value="day">Day</option>
+                <option value="night">Night</option>
+                <option value="rainy day">Rainy day</option>
+              </select>
             <div class="input-container">
                 <input>
                 <div id="submit">➢</div>

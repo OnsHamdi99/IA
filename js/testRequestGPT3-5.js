@@ -6,9 +6,20 @@ const endpointURL = 'https://api.openai.com/v1/chat/completions';
 let outputElement, submitButton, inputElement, historyElement, buttonElement;
 let imageSize = 256; // Taille par défaut des images
 let styleImage ;
-let weitherStyle;
+let weatherStyle;
 
 window.onload = init;
+function checkInput() {
+  let prompt = inputElement.value.toLowerCase().trim();
+
+  if (prompt.startsWith('/image')) {
+    // Show image-related GUI elements
+    showImageGUI();
+  } else {
+    // Hide image-related GUI elements
+    hideImageGUI();
+  }
+}
 
 function init() {
   outputElement = document.querySelector('#output');
@@ -19,11 +30,31 @@ function init() {
   historyElement = document.querySelector('.history');
   buttonElement = document.querySelector('button');
   buttonElement.onclick = clearInput;
+  styleImage = document.getElementById('style-select');
+  weatherStyle = document.getElementById('weather-select');
+  hideImageGUI();
+  inputElement.addEventListener('input', checkInput);
+}
+function showImageGUI() {
+  styleImage.style.display = 'block';
+  weatherStyle.style.display = 'block';
 }
 
+function hideImageGUI() {
+  styleImage.style.display = 'none';
+  weatherStyle.style.display = 'none';
+}
 function clearInput() {
   inputElement.value = '';
 }
+
+function downloadImage(url) {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'image.jpg';
+  link.target = '_blank';
+  link.click();
+  }
 
 async function getMessage() {
   let prompt = inputElement.value.toLowerCase().trim(); // On met le prompt en minuscules et on supprime les espaces au début et à la fin
@@ -37,7 +68,12 @@ async function getMessage() {
     } else { // on supprime juste /image, une taille n'a pas été détectée, on récu^ère taille par défaut définie plus haut
         prompt = prompt.substr(7);
         }
-    
+        if (styleImage.value != ""){
+          prompt = prompt + " in " + styleImage.value + " style";
+  }
+  if (weatherStyle != ""){
+          prompt = prompt + " during " + weatherStyle.value;
+  }
     console.log("Prompt final de l'utilisateur : ", prompt);
     //début gestion génération de propmt à partir du prompt de l'utilisateur
     console.log("Message de GPT-3.5 pour DALL-E");
@@ -48,7 +84,7 @@ async function getMessage() {
     let images = await getImageFromDallE(generatedPrompt);
 
     // Effacer les images précédentes
-    outputElement.innerHTML = '';
+  //  outputElement.innerHTML = '';
 
     images.data.forEach(imageObj => {
       const imageContainer = document.createElement('div');
@@ -61,8 +97,20 @@ async function getMessage() {
 
       imageContainer.append(imgElement);
 
+      // Add the download button
+      const downloadButton = document.createElement('button');
+      downloadButton.innerHTML = '<i class="fa fa-download"></i> Download Image';
+      downloadButton.classList.add('download-button');
+      downloadButton.addEventListener('click', () => {
+        console.log("image url : " + imageObj.url)
+        downloadImage(imageObj.url);
+      });
+
+      imageContainer.append(downloadButton);
+
       outputElement.append(imageContainer);
     });
+    
   } else {
     console.log("Message de GPT-3.5");
     getResponseFromGPT(prompt);
