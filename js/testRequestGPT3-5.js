@@ -7,6 +7,7 @@ let outputElement, submitButton, inputElement, historyElement, buttonElement;
 let imageSize = 256; // Taille par défaut des images
 let styleImage ;
 let weatherStyle;
+let conversations = [];
 
 window.onload = init;
 function checkInput() {
@@ -29,6 +30,7 @@ function init() {
   inputElement = document.querySelector('input');
   historyElement = document.querySelector('.history');
   buttonElement = document.querySelector('button');
+  buttonElement.addEventListener('click', startNewChat);
   buttonElement.onclick = clearInput;
   styleImage = document.getElementById('style-select');
   weatherStyle = document.getElementById('weather-select');
@@ -38,6 +40,40 @@ function init() {
 function showImageGUI() {
   styleImage.style.display = 'block';
   weatherStyle.style.display = 'block';
+}
+function loadConversation(conversation) {
+  outputElement.innerHTML = ''; // Clear the output element
+
+  // Render each message in the selected conversation
+  conversation.messages.forEach(message => {
+      renderMessage(message);
+  });
+}
+const numConversations = 0;
+function renderConversationList() {
+  numConversations
+  const conversationListElement = document.getElementById('conversation-list');
+  conversationListElement.innerHTML = ''; // Clear the conversation list
+
+  conversations.forEach(conversation => {
+      const conversationItem = document.createElement('li');
+      conversationItem.textContent = 'Conversation ' + numConversations;
+      conversationItem.addEventListener('click', () => {
+          loadConversation(conversation); // Load the selected conversation
+      });
+      conversationListElement.appendChild(conversationItem);
+  });
+}
+
+function startNewChat() {
+  const conversation = {
+      id: Date.now(), // Generate a unique ID for the conversation
+      messages: [] // Array to store messages of the conversation
+  };
+  conversations.push(conversation); // Add the new conversation to the list
+
+  renderConversationList(); // Update the conversation list UI
+  clearInput(); // Clear the input field
 }
 
 function hideImageGUI() {
@@ -58,8 +94,14 @@ function downloadImage(url) {
 
 async function getMessage() {
   let prompt = inputElement.value.toLowerCase().trim(); // On met le prompt en minuscules et on supprime les espaces au début et à la fin
+  const userMessage = {
+  role: 'user',
+  content: prompt
+};
+  const currentConversation = conversations[conversations.length - 1];
+    currentConversation.messages.push(userMessage); // Add the user's message
 
-  if (prompt.startsWith('/image ')) { 
+  if (prompt.startsWith('/image')) { 
     // Extraction de la taille des images depuis le prompt (si spécifiée)
     const promptParts = prompt.split(' '); // On sépare le prompt en mots
     if (promptParts.length >= 2 && !isNaN(promptParts[1])) { // Si le deuxième mot est un nombre
@@ -68,7 +110,7 @@ async function getMessage() {
     } else { // on supprime juste /image, une taille n'a pas été détectée, on récu^ère taille par défaut définie plus haut
         prompt = prompt.substr(7);
         }
-        if (styleImage.value != ""){
+    if (styleImage.value != ""){
           prompt = prompt + " in " + styleImage.value + " style";
   }
   if (weatherStyle != ""){
@@ -77,11 +119,11 @@ async function getMessage() {
     console.log("Prompt final de l'utilisateur : ", prompt);
     //début gestion génération de propmt à partir du prompt de l'utilisateur
     console.log("Message de GPT-3.5 pour DALL-E");
-    const generatedPrompt = await getPromptFromGPT(prompt); // On génère le prompt pour DALL-E
-    console.log("Prompt généré pour DALL-E :", generatedPrompt);
+   // const generatedPrompt = await getPromptFromGPT(prompt); // On génère le prompt pour DALL-E
+    //console.log("Prompt généré pour DALL-E :", generatedPrompt);
 
     console.log("Image de DALL-E");
-    let images = await getImageFromDallE(generatedPrompt);
+    let images = await getImageFromDallE(prompt);
 
     // Effacer les images précédentes
   //  outputElement.innerHTML = '';
@@ -115,9 +157,21 @@ async function getMessage() {
     console.log("Message de GPT-3.5");
     getResponseFromGPT(prompt);
   }
-
+  renderMessage(userMessage); // Render the user's message in the UI
   // On vide l'input
   inputElement.value = '';
+}
+function renderMessage(message) {
+  const messageElement = document.createElement('p');
+  messageElement.textContent = message.content;
+
+  if (message.role === 'user') {
+      messageElement.classList.add('user-message');
+  } else {
+      messageElement.classList.add('response-message');
+  }
+
+  outputElement.appendChild(messageElement);
 }
 /*
 Fonction pour générer le prompt pour DALL-E à partir du prompt de l'utilisateur
