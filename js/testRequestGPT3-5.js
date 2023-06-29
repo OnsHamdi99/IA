@@ -9,6 +9,7 @@ let styleImage ;
 let weatherStyle;
 let conversations = [];
 
+
 window.onload = init;
 function checkInput() {
   let prompt = inputElement.value.toLowerCase().trim();
@@ -23,6 +24,7 @@ function checkInput() {
 }
 
 function init() {
+
   outputElement = document.querySelector('#output');
   submitButton = document.querySelector('#submit');
   submitButton.onclick = getMessage;
@@ -30,6 +32,7 @@ function init() {
   inputElement = document.querySelector('input');
   historyElement = document.querySelector('.history');
   buttonElement = document.querySelector('button');
+   startNewChat(); 
   buttonElement.addEventListener('click', startNewChat);
   buttonElement.onclick = clearInput;
   styleImage = document.getElementById('style-select');
@@ -46,18 +49,20 @@ function loadConversation(conversation) {
 
   // Render each message in the selected conversation
   conversation.messages.forEach(message => {
+    if (message.role !== 'user') {
       renderMessage(message);
+    }
   });
 }
-const numConversations = 0;
+
 function renderConversationList() {
-  numConversations
+  console.log("renderConversationList");
   const conversationListElement = document.getElementById('conversation-list');
   conversationListElement.innerHTML = ''; // Clear the conversation list
 
   conversations.forEach(conversation => {
       const conversationItem = document.createElement('li');
-      conversationItem.textContent = 'Conversation ' + numConversations;
+      conversationItem.textContent = 'Conversation';
       conversationItem.addEventListener('click', () => {
           loadConversation(conversation); // Load the selected conversation
       });
@@ -66,8 +71,9 @@ function renderConversationList() {
 }
 
 function startNewChat() {
+  console.log("startNewChat");
   const conversation = {
-      id: Date.now(), // Generate a unique ID for the conversation
+      id: Date.now(), // Unique ID for the conversation
       messages: [] // Array to store messages of the conversation
   };
   conversations.push(conversation); // Add the new conversation to the list
@@ -93,13 +99,14 @@ function downloadImage(url) {
   }
 
 async function getMessage() {
+  console.log("getMessage");
   let prompt = inputElement.value.toLowerCase().trim(); // On met le prompt en minuscules et on supprime les espaces au début et à la fin
   const userMessage = {
-  role: 'user',
-  content: prompt
-};
+    role: 'user',
+    content: prompt
+  };
   const currentConversation = conversations[conversations.length - 1];
-    currentConversation.messages.push(userMessage); // Add the user's message
+  currentConversation.messages.push(userMessage); // Add the user's message
 
   if (prompt.startsWith('/image')) { 
     // Extraction de la taille des images depuis le prompt (si spécifiée)
@@ -108,25 +115,25 @@ async function getMessage() {
       imageSize = parseInt(promptParts[1], 10); // On récupère la taille
       prompt = promptParts.slice(2).join(' '); // On supprime la taille et on recolle les mots
     } else { // on supprime juste /image, une taille n'a pas été détectée, on récu^ère taille par défaut définie plus haut
-        prompt = prompt.substr(7);
-        }
-    if (styleImage.value != ""){
-          prompt = prompt + " in " + styleImage.value + " style";
-  }
-  if (weatherStyle != ""){
-          prompt = prompt + " during " + weatherStyle.value;
-  }
+      prompt = prompt.substr(7);
+    }
+    if (styleImage.value != "") {
+      prompt = prompt + " in " + styleImage.value + " style";
+    }
+    if (weatherStyle.value != "") {
+      prompt = prompt + " during " + weatherStyle.value;
+    }
     console.log("Prompt final de l'utilisateur : ", prompt);
     //début gestion génération de propmt à partir du prompt de l'utilisateur
     console.log("Message de GPT-3.5 pour DALL-E");
-   // const generatedPrompt = await getPromptFromGPT(prompt); // On génère le prompt pour DALL-E
-    //console.log("Prompt généré pour DALL-E :", generatedPrompt);
+    // const generatedPrompt = await getPromptFromGPT(prompt); // On génère le prompt pour DALL-E
+    // console.log("Prompt généré pour DALL-E :", generatedPrompt);
 
     console.log("Image de DALL-E");
     let images = await getImageFromDallE(prompt);
 
     // Effacer les images précédentes
-  //  outputElement.innerHTML = '';
+    // outputElement.innerHTML = '';
 
     images.data.forEach(imageObj => {
       const imageContainer = document.createElement('div');
@@ -152,59 +159,32 @@ async function getMessage() {
 
       outputElement.append(imageContainer);
     });
-    
+
+    renderMessage(userMessage); // Render the user's message in the UI
+
   } else {
     console.log("Message de GPT-3.5");
     getResponseFromGPT(prompt);
+    renderMessage(userMessage); // Render the user's message in the UI
   }
-  renderMessage(userMessage); // Render the user's message in the UI
+
   // On vide l'input
   inputElement.value = '';
 }
+
 function renderMessage(message) {
   const messageElement = document.createElement('p');
   messageElement.textContent = message.content;
 
   if (message.role === 'user') {
-      messageElement.classList.add('user-message');
+    messageElement.classList.add('question');
   } else {
-      messageElement.classList.add('response-message');
+    messageElement.classList.add('response-message');
   }
 
   outputElement.appendChild(messageElement);
 }
-/*
-Fonction pour générer le prompt pour DALL-E à partir du prompt de l'utilisateur
-*/
-async function getPromptFromGPT(prompt) {
-  const options = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${API_KEY}`
-    },
-    body: JSON.stringify({
-      model: "gpt-3.5-turbo",
-      messages: [{
-        role: "system",
-        content: "/dall-e/generate_prompt"
-      }, {
-        role: "user",
-        content: prompt
-      }],
-      max_tokens: 30
-    })
-  };
-  try {
-    const response = await fetch(endpointURL, options); // On envoie la requête
-    const data = await response.json(); // On récupère la réponse
-    const generatedPrompt = data.choices[0].message.content;    // On récupère le prompt généré
-    return generatedPrompt; // On retourne le prompt généré
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
-}
+
 
 async function getResponseFromGPT(prompt) {
   const options = {
@@ -228,13 +208,13 @@ async function getResponseFromGPT(prompt) {
     const data = await response.json();
     console.log(data);
     const chatGptReponseTxt = data.choices[0].message.content;
-
+/*
     // Create a <p> element for the user's question
     const questionElement = document.createElement('p');
     questionElement.textContent = prompt;
     questionElement.classList.add('question');
     outputElement.appendChild(questionElement);
-
+*/
     // Create a <p> element for the response
     const responseElement = document.createElement('p');
     responseElement.textContent = chatGptReponseTxt;
