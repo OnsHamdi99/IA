@@ -9,6 +9,8 @@ let styleImage ;
 let weatherStyle;
 let conversations = [];
 
+let isSpeechRecognitionActive = false; // Variable pour indiquer si la reconnaissance vocale est active
+let recognition; // Variable pour stocker l'instance de la reconnaissance vocale
 
 window.onload = init;
 function checkInput() {
@@ -21,6 +23,64 @@ function checkInput() {
     // Hide image-related GUI elements
     hideImageGUI();
   }
+
+  const microphoneButton = document.getElementById('microphoneButton');
+  microphoneButton.addEventListener('click', toggleSpeechRecognition);
+
+  function toggleSpeechRecognition() {
+    console.log(1);
+
+      if (!isSpeechRecognitionActive) {
+          inputElement.focus();
+          startSpeechRecognition();
+      } else {
+          stopSpeechRecognition();
+      }
+  }
+    
+    function startSpeechRecognition() {
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            // Créer une instance de la reconnaissance vocale
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+
+            recognition.lang = 'fr-FR'; // Définir le code de langue en français
+
+            // Événement lorsque la reconnaissance vocale reçoit un résultat
+            recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            console.log("Texte reconnu : ", transcript);
+            
+            // Écrire automatiquement le texte reconnu à l'endroit pour envoyer le message
+            inputElement.value = transcript;
+
+            // Envoyer le message
+            beforeGetMessage();
+            };
+
+            // Démarrer la reconnaissance vocale
+            recognition.start();
+
+            // Mettre à jour l'état de la reconnaissance vocale
+            isSpeechRecognitionActive = true;
+            
+            // Mettre à jour l'apparence du bouton du microphone
+            microphoneButton.classList.add('active');
+        } else {
+            console.log("La reconnaissance vocale n'est pas prise en charge par votre navigateur.");
+        }
+    }
+
+    function stopSpeechRecognition() {
+        // Arrêter la reconnaissance vocale
+        recognition.stop();
+
+        // Mettre à jour l'état de la reconnaissance vocale
+        isSpeechRecognitionActive = false;
+        
+        // Mettre à jour l'apparence du bouton du microphone
+        microphoneButton.classList.remove('active');
+    }
 }
 
 function init() {
@@ -99,15 +159,19 @@ function downloadImage(url) {
   }
 
 async function getMessage() {
+  let prompt = inputElement.value;
   console.log("getMessage");
-  let prompt = inputElement.value.toLowerCase().trim(); // On met le prompt en minuscules et on supprime les espaces au début et à la fin
+  if (!prompt.startsWith('/video')) {
+    prompt = prompt.toLowerCase().trim();
+  }
+  //let prompt = inputElement.value.toLowerCase().trim(); // On met le prompt en minuscules et on supprime les espaces au début et à la fin
   const userMessage = {
     role: 'user',
     content: prompt
   };
   const currentConversation = conversations[conversations.length - 1];
   currentConversation.messages.push(userMessage); // Add the user's message
-
+  
   if (prompt.startsWith('/image')) { 
     // Extraction de la taille des images depuis le prompt (si spécifiée)
     const promptParts = prompt.split(' '); // On sépare le prompt en mots
@@ -162,7 +226,17 @@ async function getMessage() {
 
     renderMessage(userMessage); // Render the user's message in the UI
 
-  } else {
+  } 
+  else if(prompt.startsWith('/video')){
+    if(prompt.includes("dailymotion")) {
+      prompt = prompt.replace(/(.*)video\//,"");
+      outputElement.innerHTML += '<iframe src="https://www.dailymotion.com/embed/video/'+prompt+'" allow="fullscreen;"></iframe>'
+  } else if(prompt.includes("youtube")) {
+      prompt = prompt.replace(/(.*)v=/,"");
+      outputElement.innerHTML += '<iframe src="https://www.youtube.com/embed/'+prompt+'?autoplay=1" allow="fullscreen;"></iframe>'
+    }
+  }
+  else {
     console.log("Message de GPT-3.5");
     getResponseFromGPT(prompt);
     renderMessage(userMessage); // Render the user's message in the UI

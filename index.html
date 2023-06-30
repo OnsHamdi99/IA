@@ -6,8 +6,13 @@
     <!--
         <script src="js/testRequestDavinCi.js"></script>
     -->
-    <script type="module" src="js/testRequestGPT3-5.js"></script>
-    <audio id="audioElement" id="history-container"></audio>
+        <script type="module" src="js/testRequestGPT3-5.js"></script>
+        <audio id="audioElement" id="history-container"></audio>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+
 </head>
 <body>
     <section class="side-bar">
@@ -23,25 +28,32 @@
         <h1>MiageGPT</h1>
         <div id="output"></div>
         <div class="bottom-section">
-            <select id="style-select" style="float: left; color: black;">
-                <option value=""></option>
-                <option value="3d">3D</option>
-                <option value="realistic">Realistic</option>
-                <option value="davinci">DaVinci Style</option>
-                <option value="drawing">Drawing crayon</option>
-              </select>
-              <select id="weather-select" style="float: left; color: black;">
-                <option value=""></option>
-                <option value="day">Day</option>
-                <option value="night">Night</option>
-                <option value="rainy day">Rainy day</option>
-              </select>
+            <div id="imgSelect">
+                <select id="style-select" style="float: left; color: black;">
+                    <option value=""></option>
+                    <option value="3d">3D</option>
+                    <option value="realistic">Realistic</option>
+                    <option value="davinci">DaVinci Style</option>
+                    <option value="drawing">Drawing crayon</option>
+                  </select>
+                  <select id="weather-select" style="float: left; color: black;">
+                    <option value=""></option>
+                    <option value="day">Day</option>
+                    <option value="night">Night</option>
+                    <option value="rainy day">Rainy day</option>
+                  </select>
+            </div>
             <div class="input-container">
                 <input>
-                <div id="submit">➢</div>
+                <div id="boutons">
+                    <div id="microphoneButton" class="microphone-button"><i class="fas fa-microphone"></i></div>
+                    <div id="submit">➢</div>
+                </div>
             </div>
         </div>
         <p class="info">Miage GPT Apr 27 version, un essai pour un TP avec les M1 Miage...</p>
     </section>
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.min.js"></script>
+<script type="module" src="js/testRequestGPT3-5.js"></script>
 </html>

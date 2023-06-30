@@ -16,7 +16,7 @@ body {
 h1 {
     font-size: 33px;
     font-weight: 600;
-    padding: 200px 0;
+    /* padding: 200px 0; */
 }
 
 .side-bar {
@@ -74,13 +74,19 @@ input:focus {
     position:relative;
     width: 100%;
     max-width: 650px;
+    margin-top: 30rem;
 }
 
-.input-container #submit {
+.input-container #boutons {
+    display: flex;
     position:absolute;
     right: 20;
     bottom: 15px;
     cursor:pointer;
+}
+#microphoneButton{
+    margin-right: 1rem;
+    margin-top: .3rem;
 }
 
 button {
@@ -126,3 +132,42 @@ nav {
     padding: 10px;
     margin-bottom: 10px;
   }
+
+  /* CSS Add */
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 5px;
+}
+
+#microphoneButton{
+    /* position: absolute;
+    bottom: 8.3rem;
+    right: 29rem; */
+    display: inline-block;
+    cursor: pointer;
+}
+.microphone-button.active i {
+    color: green; /* Couleur de l'icône lorsque le bouton est actif */
+}
+  
+.microphone-button i {
+    color: white; /* Couleur de l'icône par défaut */
+}
+
+.main #output{
+    display: flex;
+    flex-direction: column;
+}
+iframe{
+    margin: 2rem 0;
+}
+
+#imgSelect{
+    display: flex;
+    flex-direction: column;
+}
+
+.image-container{
+    display: inline-block;
+}
