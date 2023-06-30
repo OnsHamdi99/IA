@@ -223,7 +223,7 @@ async function getMessage() {
 
       outputElement.append(imageContainer);
     });
-
+    hideImageGUI();
     renderMessage(userMessage); // Render the user's message in the UI
 
   } 

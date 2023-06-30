@@ -164,10 +164,13 @@ iframe{
 }
 
 #imgSelect{
-    display: flex;
-    flex-direction: column;
+    position: fixed;
+    bottom: 13rem;
+    right: 40%;
 }
 
-.image-container{
-    display: inline-block;
+.image-container {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: rgb(38, 57, 77) 0 20px 30px -10px;
 }
